@@ -134,16 +134,19 @@ namespace FileCopier
                         { 
                               File.Move(file.FullName, Path.Combine(savePath, file.Name));
                         }
-                        catch (IOException ex)
+                        catch (IOException)
                         {
                             DirectoryInfo dir = new DirectoryInfo(savePath);
                             FileInfo[] saveFiles = dir.GetFiles(file.Name + "*");
 
-                            string fileNameWithoutExt = file.Name.Substring(0, file.Name.LastIndexOf('.'));
-                            string newSavePath = Path.Combine(savePath, String.Format("{0}({1}).pdf", fileNameWithoutExt, saveFiles.Count()));
+                            string fileNameWithoutExt = StripExt(file.Name);
+
+                            int fileCount = CheckFilesWithName(file.Name, savePath);
+
+                            string newSavePath = Path.Combine(savePath, String.Format("{0}({1}).pdf", fileNameWithoutExt, fileCount));
                             File.Move(file.FullName, newSavePath);
                         }
-
+                        
                         if (InvokeRequired)
                         {
                             BeginInvoke(new Action(() =>
@@ -164,6 +167,18 @@ namespace FileCopier
             }
 
             return true;
+        }
+
+
+        private string StripExt(string file)
+        {
+            return file.Substring(0, file.LastIndexOf('.'));
+        }
+
+        private int CheckFilesWithName(string name, string path)
+        {
+            return Directory.GetFiles(path, "*" + StripExt(name) + "*").Count();
+            
         }
 
         private async void uxCopyButton_ClickAsync(object sender, EventArgs e)
