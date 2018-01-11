@@ -22,9 +22,9 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://github.com/Jordan-M/Copy-All-Files/blob/master/FileCopier/publish/</InstallUrl>
-    <UpdateUrl>https://github.com/Jordan-M/Copy-All-Files/blob/master/FileCopier/publish/</UpdateUrl>
-    <ApplicationRevision>0</ApplicationRevision>
+    <InstallUrl>https://raw.githubusercontent.com/Jordan-M/Copy-All-Files/master/FileCopier/publish/</InstallUrl>
+    <UpdateUrl>https://raw.githubusercontent.com/Jordan-M/Copy-All-Files/master/FileCopier/publish/</UpdateUrl>
+    <ApplicationRevision>1</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
