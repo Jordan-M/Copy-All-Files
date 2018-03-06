@@ -112,7 +112,7 @@ namespace FileCopier
 
             try
             {
-                files = root.GetFiles("*.pdf");
+                files = root.GetFiles("*");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -123,47 +123,43 @@ namespace FileCopier
                 Console.WriteLine(ex.Message);
             }
 
-            if (files != null)
+            if (files != null && files.Count() > 0)
             {
-                if (files.Count() > 0)
+                foreach (FileInfo file in files)
                 {
-
-                    foreach (FileInfo file in files)
+                    try
+                    { 
+                            File.Move(file.FullName, Path.Combine(savePath, file.Name));
+                    }
+                    catch (IOException)
                     {
-                        try
-                        { 
-                              File.Move(file.FullName, Path.Combine(savePath, file.Name));
-                        }
-                        catch (IOException)
-                        {
-                            DirectoryInfo dir = new DirectoryInfo(savePath);
-                            FileInfo[] saveFiles = dir.GetFiles(file.Name + "*");
+                        DirectoryInfo dir = new DirectoryInfo(savePath);
+                        FileInfo[] saveFiles = dir.GetFiles(file.Name + "*");
 
-                            string fileNameWithoutExt = StripExt(file.Name);
+                        string fileNameWithoutExt = StripExt(file.Name);
 
-                            int fileCount = CheckFilesWithName(file.Name, savePath);
+                        int fileCount = CheckFilesWithName(file.Name, savePath);
 
-                            string newSavePath = Path.Combine(savePath, String.Format("{0}({1}).pdf", fileNameWithoutExt, fileCount));
-                            File.Move(file.FullName, newSavePath);
-                        }
+                        string newSavePath = Path.Combine(savePath, String.Format("{0}({1}).pdf", fileNameWithoutExt, fileCount));
+                        File.Move(file.FullName, newSavePath);
+                    }
                         
-                        if (InvokeRequired)
+                    if (InvokeRequired)
+                    {
+                        BeginInvoke(new Action(() =>
                         {
-                            BeginInvoke(new Action(() =>
-                            {
-                                uxProgressBar.Value++;
-                                uxProgressLabel.Text = uxProgressBar.Value + "/" + uxProgressBar.Maximum;
-                            }));
-                        }
+                            uxProgressBar.Value++;
+                            uxProgressLabel.Text = uxProgressBar.Value + "/" + uxProgressBar.Maximum;
+                        }));
                     }
                 }
+            }
 
-                subDirs = root.GetDirectories();
+            subDirs = root.GetDirectories();
 
-                foreach (DirectoryInfo dirInfo in subDirs)
-                {
-                    await MoveFolder(dirInfo, savePath);
-                }
+            foreach (DirectoryInfo dirInfo in subDirs)
+            {
+                await MoveFolder(dirInfo, savePath);
             }
 
             return true;
