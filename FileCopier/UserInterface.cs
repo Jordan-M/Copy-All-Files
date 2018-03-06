@@ -52,7 +52,6 @@ namespace FileCopier
             }
         }
 
-
         /// <summary>
         /// Toggles all the UI buttons, and resets the progress bar
         /// </summary>
@@ -67,19 +66,9 @@ namespace FileCopier
         /// </summary>
         private void ResetProgress()
         {
-            progress.Reset(CalculateNumFiles(uxSource.Text, true));
+            progress.Reset(FolderOperations.CalculateNumFiles(uxSource.Text, true));
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="searchSubfolders"></param>
-        /// <returns></returns>
-        public static int CalculateNumFiles(string location, bool searchSubfolders)
-        {
-            SearchOption option = (searchSubfolders) ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            return Directory.GetFiles(location, "*.*", option).Length;
-        }
 
         /// <summary>
         /// Sets all buttons to the opposite enabled status
@@ -92,17 +81,6 @@ namespace FileCopier
         }
 
 
-        private void RemoveEmptyFolders(string root)
-        {
-            foreach (var directory in Directory.GetDirectories(root))
-            {
-                RemoveEmptyFolders(directory);
-                if (Directory.GetFiles(directory).Length == 0 && Directory.GetDirectories(directory).Length == 0)
-                {
-                    Directory.Delete(directory, false);
-                }
-            }
-        }
 
         private async Task<bool> MoveFolder(DirectoryInfo root, string savePath)
         {
@@ -135,11 +113,12 @@ namespace FileCopier
                         DirectoryInfo dir = new DirectoryInfo(savePath);
                         FileInfo[] saveFiles = dir.GetFiles(file.Name + "*");
 
-                        string fileNameWithoutExt = StripExt(file.Name);
+                        string fileNameWithoutExt = FilePathDeconstructor.PathWithoutExt(file.Name);
+                        string fileExt = FilePathDeconstructor.GetExt(file.Name);
 
-                        int fileCount = CheckFilesWithName(file.Name, savePath);
+                        int fileCount = FolderOperations.CheckFilesWithName(file.Name, savePath);
 
-                        string newSavePath = Path.Combine(savePath, String.Format("{0}({1}).pdf", fileNameWithoutExt, fileCount));
+                        string newSavePath = Path.Combine(savePath, String.Format("{0}({1}).{2}", fileNameWithoutExt, fileCount, fileExt));
                         File.Move(file.FullName, newSavePath);
                     }
                         
@@ -163,18 +142,6 @@ namespace FileCopier
             return true;
         }
 
-
-        private string StripExt(string file)
-        {
-            return file.Substring(0, file.LastIndexOf('.'));
-        }
-
-        private int CheckFilesWithName(string name, string path)
-        {
-            return Directory.GetFiles(path, "*" + StripExt(name) + "*").Count();
-            
-        }
-
         private async void uxCopyButton_ClickAsync(object sender, EventArgs e)
         {
             if (uxSource.Text != String.Empty && uxDest.Text != String.Empty)
@@ -187,7 +154,7 @@ namespace FileCopier
                 DirectoryInfo dir = new DirectoryInfo(uxSource.Text);
                 Task<bool> test = await Task.Factory.StartNew(() => MoveFolder(dir, uxDest.Text));
 
-                RemoveEmptyFolders(uxSource.Text);
+                FolderOperations.RemoveEmptyFolders(uxSource.Text);
                 MessageBox.Show("Finished dumping files!");
 
                 _operationInProgress = false;
