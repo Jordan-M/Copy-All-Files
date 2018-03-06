@@ -121,6 +121,7 @@ namespace FileCopier
             this.MinimumSize = new System.Drawing.Size(353, 140);
             this.Name = "UserInterface";
             this.Text = "Copy Files";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UserInterface_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 

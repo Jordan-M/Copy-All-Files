@@ -192,6 +192,7 @@ namespace FileCopier
 
                 _operationInProgress = false;
                 progress.Hide();
+
                 ResetUI();
             }
         }

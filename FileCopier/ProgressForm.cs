@@ -29,5 +29,19 @@ namespace FileCopier
             progress.Maximum = max;
             progressLabel.Text = String.Format("0/{0}", progress.Maximum);
         }
+
+        private void ProgressForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // We don't want to stop windows from trying to close down
+            if (e.CloseReason == CloseReason.WindowsShutDown) return;
+
+            DialogResult result = MessageBox.Show("An operation is currently in progress, are you sure you would like to quit?", "Confirm exit", MessageBoxButtons.YesNo);
+
+            if (result == DialogResult.No)
+                e.Cancel = true;
+            else
+                return;
+            
+        }
     }
 }
