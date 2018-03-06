@@ -14,6 +14,7 @@ namespace FileCopier
     public partial class UserInterface : Form
     {
         private bool _operationInProgress = false;
+        private ProgressForm progress = new ProgressForm();
         public UserInterface()
         {
             InitializeComponent();
@@ -66,9 +67,7 @@ namespace FileCopier
         /// </summary>
         private void ResetProgress()
         {
-            uxProgressBar.Value = 0;
-            uxProgressBar.Maximum = CalculateNumFiles(uxSource.Text, true);
-            uxProgressLabel.Text = "0/" + uxProgressBar.Maximum;
+            progress.Reset(CalculateNumFiles(uxSource.Text, true));
         }
 
         /// <summary>
@@ -148,8 +147,7 @@ namespace FileCopier
                     {
                         BeginInvoke(new Action(() =>
                         {
-                            uxProgressBar.Value++;
-                            uxProgressLabel.Text = uxProgressBar.Value + "/" + uxProgressBar.Maximum;
+                            progress.Increment();
                         }));
                     }
                 }
@@ -184,6 +182,8 @@ namespace FileCopier
                 ResetUI();
                 _operationInProgress = true;
 
+                progress.Show();
+
                 DirectoryInfo dir = new DirectoryInfo(uxSource.Text);
                 Task<bool> test = await Task.Factory.StartNew(() => MoveFolder(dir, uxDest.Text));
 
@@ -191,6 +191,7 @@ namespace FileCopier
                 MessageBox.Show("Finished dumping files!");
 
                 _operationInProgress = false;
+                progress.Hide();
                 ResetUI();
             }
         }
