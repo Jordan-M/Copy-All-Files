@@ -80,8 +80,6 @@ namespace FileCopier
             uxCopyButton.Enabled = !uxCopyButton.Enabled;
         }
 
-
-
         private async Task<bool> MoveFolder(DirectoryInfo root, string savePath)
         {
             FileInfo[] files = null;
@@ -104,24 +102,8 @@ namespace FileCopier
             {
                 foreach (FileInfo file in files)
                 {
-                    try
-                    { 
-                            File.Move(file.FullName, Path.Combine(savePath, file.Name));
-                    }
-                    catch (IOException)
-                    {
-                        DirectoryInfo dir = new DirectoryInfo(savePath);
-                        FileInfo[] saveFiles = dir.GetFiles(file.Name + "*");
+                    MoveFile(file, savePath);
 
-                        string fileNameWithoutExt = FilePathDeconstructor.PathWithoutExt(file.Name);
-                        string fileExt = FilePathDeconstructor.GetExt(file.Name);
-
-                        int fileCount = FolderOperations.CheckFilesWithName(file.Name, savePath);
-
-                        string newSavePath = Path.Combine(savePath, String.Format("{0}({1}).{2}", fileNameWithoutExt, fileCount, fileExt));
-                        File.Move(file.FullName, newSavePath);
-                    }
-                        
                     if (InvokeRequired)
                     {
                         BeginInvoke(new Action(() =>
@@ -140,6 +122,40 @@ namespace FileCopier
             }
 
             return true;
+        }
+
+        private void MoveFile(FileInfo file, string destination)
+        {
+            File.Move(file.FullName, CreateUniqueFileName(file, destination));
+        }
+
+        private string CreateUniqueFileName(FileInfo file, string destination)
+        {
+            string savePath = Path.Combine(destination, file.Name);
+
+            int fileCount = 0;
+            string fileExt = "";
+            string fileNameWithoutExt = "";
+
+            if (File.Exists(savePath))
+            {
+                DirectoryInfo dir = new DirectoryInfo(destination);
+                FileInfo[] saveFiles = dir.GetFiles(file.Name + "*");
+
+                fileNameWithoutExt = FilePathDeconstructor.PathWithoutExt(file.Name);
+                fileExt = FilePathDeconstructor.GetExt(file.Name);
+                fileCount = FolderOperations.CheckFilesWithName(file.Name, destination);
+
+                savePath = Path.Combine(destination, String.Format("{0}({1}).{2}", fileNameWithoutExt, fileCount, fileExt));
+            }
+
+            while (File.Exists(savePath))
+            {
+                fileCount++;
+                savePath = Path.Combine(destination, String.Format("{0}({1}).{2}", fileNameWithoutExt, fileCount, fileExt));
+            }
+
+            return savePath;
         }
 
         private async void uxCopyButton_ClickAsync(object sender, EventArgs e)

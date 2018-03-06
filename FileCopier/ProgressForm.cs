@@ -40,7 +40,7 @@ namespace FileCopier
             if (result == DialogResult.No)
                 e.Cancel = true;
             else
-                return;
+                Application.Exit();
             
         }
     }

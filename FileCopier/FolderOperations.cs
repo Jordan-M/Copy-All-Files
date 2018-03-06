@@ -24,7 +24,6 @@ namespace FileCopier
         public static int CheckFilesWithName(string name, string path)
         {
             return Directory.GetFiles(path, "*" + FilePathDeconstructor.PathWithoutExt(name) + "*").Count();
-
         }
 
         /// <summary>
